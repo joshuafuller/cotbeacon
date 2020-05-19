@@ -46,7 +46,7 @@ class SpeedDialCreator {
     }
 
     private static SpeedDialActionItem buildSpeedDialViewItem(Context context, int itemId, int iconId, int textId) {
-        int textColour = ContextCompat.getColor(context, R.color.colorAccent);
+        int textColour = ContextCompat.getColor(context, R.color.colorAccentDark);
         int backgroundColour = ContextCompat.getColor(context, R.color.white);
         return new SpeedDialActionItem.Builder(itemId, iconId)
                 .setFabBackgroundColor(backgroundColour)

@@ -21,8 +21,10 @@
         app:layout_behavior="@string/speeddial_snackbar_behavior"
         app:sdExpansionMode="top"
         app:sdMainFabAnimationRotateAngle="90"
+        app:sdMainFabClosedBackgroundColor="@color/colorAccentDark"
         app:sdMainFabClosedIconColor="@color/white"
         app:sdMainFabClosedSrc="@android:drawable/stat_sys_warning"
+        app:sdMainFabOpenedBackgroundColor="@color/colorAccentDark"
         app:sdMainFabOpenedIconColor="@color/white"
         app:sdMainFabOpenedSrc="@drawable/cross" />
 
