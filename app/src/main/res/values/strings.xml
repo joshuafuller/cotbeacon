@@ -1,15 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="ButtonCase">
-    <string name="app_name">CoT Generator</string>
+    <string name="app_name">CoT Beacon</string>
 
     <string name="stop">Stop</string>
     <string name="start">Start</string>
     <string name="about">About</string>
-
-    <string name="toggleGpsBeacon">GPS BEACON</string>
-    <string name="toggleFake">FAKE ICONS</string>
-
-    <string name="transmittedDataGps">GPS Position</string>
-    <string name="transmittedDataFake">Fake Icons</string>
 
     <string name="transmissionProtocolTcp">TCP</string>
     <string name="transmissionProtocolUdp">UDP</string>

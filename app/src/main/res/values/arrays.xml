@@ -20,11 +20,6 @@
         <item>UDP</item>
     </string-array>
 
-    <string-array name="transmittedDataTypes">
-        <item>@string/transmittedDataGps</item>
-        <item>@string/transmittedDataFake</item>
-    </string-array>
-
     <string-array name="tcpPresetEntries">
         <item>@string/tcpFreetakserver</item>
         <item>@string/tcpTakserver</item>

@@ -1,13 +1,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <ListPreference
-        android:key="transmittedData"
-        app:defaultValue="@string/defaultTransmittedData"
-        app:entries="@array/transmittedDataTypes"
-        app:entryValues="@array/transmittedDataTypes"
-        app:isPreferenceVisible="false" />
-
     <PreferenceCategory
         app:iconSpaceReserved="false"
         app:title="CoT Settings">
@@ -29,12 +22,6 @@
             app:title="Stale Timer (minutes)"
             app:useSimpleSummaryProvider="true" />
 
-        <SwitchPreference
-            android:defaultValue="@bool/defaultRandomColour"
-            android:key="randomColour"
-            app:iconSpaceReserved="false"
-            app:title="Use Random Team Colours?" />
-
         <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
             android:defaultValue="@integer/defaultTeamColour"
             android:key="teamColour"
@@ -44,50 +31,6 @@
             app:cpv_showColorShades="false"
             app:iconSpaceReserved="false"
             app:title="Team Colour" />
-
-        <EditTextPreference
-            android:key="iconCount"
-            app:defaultValue="@string/defaultIconCount"
-            app:iconSpaceReserved="false"
-            app:title="Icon Count"
-            app:useSimpleSummaryProvider="true" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:key="locationGroup"
-        app:iconSpaceReserved="false"
-        app:title="Location Settings">
-
-        <SwitchPreference
-            android:defaultValue="@bool/defaultFollowMyGpsLocation"
-            android:key="followMyGpsLocation"
-            app:iconSpaceReserved="false"
-            app:title="Follow My GPS Location?" />
-
-        <EditTextPreference
-            android:key="centreLatitude"
-            app:defaultValue="@string/defaultLatitude"
-            app:iconSpaceReserved="false"
-            app:title="Centre Latitude" />
-
-        <EditTextPreference
-            android:key="centreLongitude"
-            app:defaultValue="@string/defaultLongitude"
-            app:iconSpaceReserved="false"
-            app:title="Centre Longitude" />
-
-        <EditTextPreference
-            android:key="radialDistribution"
-            app:defaultValue="@string/defaultRadialDistribution"
-            app:iconSpaceReserved="false"
-            app:title="Radial Distribution" />
-
-        <EditTextPreference
-            android:key="movementSpeed"
-            app:defaultValue="@string/defaultMovementSpeed"
-            app:iconSpaceReserved="false"
-            app:title="Icon Movement Speed" />
 
     </PreferenceCategory>
 

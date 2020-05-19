@@ -1,5 +1,5 @@
 <resources>
-    <color name="app_icon_background">#00FFFFFF</color>
+    <color name="icon_background">#00FFFFFF</color>
 
     <color name="white">#FFFFFF</color>
     <color name="grey">#A3A3A3</color>
@@ -8,8 +8,8 @@
 
     <color name="colorPrimary">#323131</color>
     <color name="colorPrimaryDark">@color/black</color>
-    <color name="colorAccent">#FF0000</color>
-    <color name="colorAccentDark">#970000</color>
+    <color name="colorAccent">#00FF00</color>
+    <color name="colorAccentDark">#008100</color>
 
     <color name="textColour">@color/white</color>
 
