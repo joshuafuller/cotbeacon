@@ -18,7 +18,7 @@ public class PliCursorOnTarget extends CursorOnTarget {
     // System info
     public Integer battery = null; // internal device battery remaining, scale of 1-100
     public String device = String.format("%s %s", Build.MANUFACTURER.toUpperCase(), Build.MODEL.toUpperCase());
-    public String platform = "COT-GENERATOR";
+    public String platform = "COT-BEACON";
     public String os = String.valueOf(Build.VERSION.SDK_INT);
     public String version = BuildConfig.VERSION_NAME;
 
