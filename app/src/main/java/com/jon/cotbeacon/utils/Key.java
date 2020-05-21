@@ -6,6 +6,7 @@ public final class Key {
     public static final String CALLSIGN = "callsign";
     public static final String STALE_TIMER = "staleTimer";
     public static final String TEAM_COLOUR = "teamColour";
+    public static final String ICON_ROLE = "iconRole";
     public static final String TRANSMISSION_PERIOD = "transmissionPeriod";
     public static final String TRANSMISSION_PROTOCOL = "transmissionProtocol";
     public static final String TCP_PRESETS = "tcpPresets";

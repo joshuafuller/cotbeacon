@@ -2,6 +2,7 @@ package com.jon.cotbeacon.service;
 
 import android.content.SharedPreferences;
 
+import com.jon.cotbeacon.cot.CotRole;
 import com.jon.cotbeacon.cot.CursorOnTarget;
 import com.jon.cotbeacon.cot.PliCursorOnTarget;
 import com.jon.cotbeacon.cot.UtcTimestamp;
@@ -31,6 +32,7 @@ class GpsCotGenerator extends CotGenerator {
         cot = new PliCursorOnTarget();
         cot.uid = DeviceUid.get();
         cot.callsign = PrefUtils.getString(prefs, Key.CALLSIGN);
+        cot.role = CotRole.fromPrefs(prefs);
         final UtcTimestamp now = UtcTimestamp.now();
         cot.time = now;
         cot.start = now;
