@@ -11,7 +11,6 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.IBinder;
-import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -23,8 +22,9 @@ import com.jon.cotbeacon.ui.CotActivity;
 import com.jon.cotbeacon.utils.GenerateInt;
 import com.jon.cotbeacon.utils.PrefUtils;
 
+import timber.log.Timber;
+
 public class CotService extends Service {
-    private static final String TAG = CotService.class.getSimpleName();
     private static final String BASE_INTENT_ID = BuildConfig.APPLICATION_ID + ".CotService.";
     private static final int LAUNCH_ACTIVITY_PENDING_INTENT = GenerateInt.next();
     private static final int STOP_SERVICE_PENDING_INTENT = GenerateInt.next();
@@ -56,11 +56,12 @@ public class CotService extends Service {
         if (intent != null && intent.getAction() != null) {
             switch (intent.getAction()) {
                 case START_SERVICE:
+                    Timber.i("Start service");
                     cotManager.start();
                     startForegroundService();
                     break;
                 case STOP_SERVICE:
-                    Log.i(TAG, "stop service");
+                    Timber.i("Stop service");
                     cotManager.shutdown();
                     stopForegroundService();
                     LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(CLOSE_SERVICE_INTERNAL));
@@ -90,7 +91,7 @@ public class CotService extends Service {
 
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (manager == null) {
-            Log.e(TAG, "NotificationManager == null");
+            Timber.e("NotificationManager == null");
             return;
         }
 

@@ -34,7 +34,7 @@ class AboutDialogCreator {
     private static final List<Row> ROWS = Arrays.asList(
             new Row("Build Time", getBuildDate(), null),
             new Row("Installed Version", BuildConfig.VERSION_NAME, null),
-            new Row("Latest Version", LOADING, R.drawable.refresh),
+            new Row("Latest Github Release", LOADING, R.drawable.refresh),
             new Row("Github Repository", "https://github.com/jonapoul/cotbeacon", R.drawable.go_to)
     );
     private static final int LATEST_INDEX = 2;

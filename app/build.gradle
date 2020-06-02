@@ -60,6 +60,9 @@ dependencies {
     /* Utils */
     implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
 
+    /* Logging */
+    implementation group: 'com.jakewharton.timber', name: 'timber', version: '4.7.1'
+
     /* Testing */
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
