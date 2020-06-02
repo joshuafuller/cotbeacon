@@ -40,5 +40,5 @@
     <string name="cancelEmergency">CANCEL EMERGENCY</string>
 
     <string name="addNewPreset">Add New Preset…</string>
-    <string name="deletePreset">Delete Preset…</string>
+    <string name="deletePresets">Delete Presets…</string>
 </resources>

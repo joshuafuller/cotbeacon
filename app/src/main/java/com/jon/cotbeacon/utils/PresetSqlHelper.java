@@ -5,16 +5,19 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Environment;
 
+import com.jon.cotbeacon.BuildConfig;
 import com.jon.cotbeacon.enums.Protocol;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PresetSqlHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
 
-    private static final String DATABASE_NAME = "presets.db";
+    public static final String DATABASE_NAME = "presets.db";
     private static final String TABLE = "Presets";
     private static final String PROTOCOL = "Protocol";
     private static final String ALIAS = "Alias";
@@ -82,5 +85,10 @@ public class PresetSqlHelper extends SQLiteOpenHelper {
         }
         cursor.close();
         return presets;
+    }
+
+    public static boolean deleteDatabase() {
+        String dbPath = Environment.getDataDirectory() + "/data/" + BuildConfig.APPLICATION_ID + "/databases/";
+        return new File(dbPath, DATABASE_NAME).delete();
     }
 }

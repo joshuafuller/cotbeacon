@@ -91,9 +91,9 @@
             app:useSimpleSummaryProvider="true" />
 
         <Preference
-            android:key="deletePreset"
+            android:key="deletePresets"
             app:iconSpaceReserved="false"
-            app:title="@string/deletePreset"
+            app:title="@string/deletePresets"
             app:useSimpleSummaryProvider="true" />
 
         <EditTextPreference

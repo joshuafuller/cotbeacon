@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Settings;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -70,7 +69,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
             SeekBarPreference seekbar = findPreference(key);
             seekbar.setMin(1); /* I can't set the minimum in the XML for whatever reason, so here it is */
         }
-        setNewPresetListener();
+        setPresetPreferenceListeners();
         sqlHelper = new PresetSqlHelper(requireContext());
     }
 
@@ -186,7 +185,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
         return true;
     }
 
-    private void setNewPresetListener() {
+    private void setPresetPreferenceListeners() {
         Preference addPreference = findPreference(Key.ADD_NEW_PRESET);
         if (addPreference != null) {
             addPreference.setOnPreferenceClickListener(clickedPref -> {
@@ -194,7 +193,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 return true;
             });
         }
-        Preference deletePreference = findPreference(Key.DELETE_PRESET);
+        Preference deletePreference = findPreference(Key.DELETE_PRESETS);
         if (deletePreference != null) {
             deletePreference.setOnPreferenceClickListener(clickedPref -> {
                 deletePresetDialog();
@@ -223,15 +222,30 @@ public class SettingsFragment extends PreferenceFragmentCompat
     private void deletePresetDialog() {
         new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Delete Presets")
-                .setMessage("At the moment I haven't got a method for deleting individual output presets. This button takes you to the " +
-                        "Android Settings screen for this app, so you can clear the storage (AKA remove all preferences/presets) and start from " +
-                        "scratch. I'll (probably) fix this in a later version!")
-                .setPositiveButton("SETTINGS", (dialog, buttonId) -> {
-                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                    Uri uri = Uri.fromParts("package", requireContext().getPackageName(), null);
-                    intent.setData(uri);
-                    startActivity(intent);
+                .setMessage("Clear all custom output presets? The built-in defaults will still remain.")
+                .setPositiveButton(android.R.string.ok, (dialog, buttonId) -> {
+                    resetPresetPreference(Key.UDP_PRESETS, OutputPreset.udpDefaults());
+                    resetPresetPreference(Key.TCP_PRESETS, OutputPreset.tcpDefaults());
+                    if (PresetSqlHelper.deleteDatabase()) {
+                        Notify.green(requireView(), "Successfully deleted presets");
+                    } else {
+                        Notify.red(requireView(), "Failed to delete presets");
+                    }
                 }).setNegativeButton(android.R.string.cancel, (dialog, buttonId) -> dialog.dismiss())
                 .show();
+    }
+
+    private void resetPresetPreference(String prefKey, List<OutputPreset> defaults) {
+        List<String> entries = OutputPreset.getAliases(defaults);
+        List<String> values = new ArrayList<>();
+        for (OutputPreset preset : defaults) {
+            values.add(preset.toString());
+        }
+        ListPreference preference = findPreference(prefKey);
+        if (preference != null) {
+            preference.setEntries(Arrays.copyOf(entries.toArray(), entries.size(), String[].class));
+            preference.setEntryValues(Arrays.copyOf(values.toArray(), values.size(), String[].class));
+            preference.setValueIndex(0);
+        }
     }
 }
