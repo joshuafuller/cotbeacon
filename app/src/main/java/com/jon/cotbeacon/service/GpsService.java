@@ -1,5 +1,6 @@
 package com.jon.cotbeacon.service;
 
+import android.Manifest;
 import android.app.Service;
 import android.content.Intent;
 import android.location.Location;
@@ -21,6 +22,8 @@ public class GpsService extends Service {
     public static final String STOP_SERVICE = BASE_INTENT_ID + "STOP";
     private static final String CHANGE_UPDATE_RATE = BASE_INTENT_ID + "CHANGE_UPDATE_RATE";
     private static final String NEW_UPDATE_RATE_SECONDS = BASE_INTENT_ID + "NEW_UPDATE_RATE_SECONDS";
+
+    public static final String[] GPS_PERMISSION = new String[]{Manifest.permission.ACCESS_FINE_LOCATION};
 
     private int updateRateSeconds;
     private FusedLocationProviderClient fusedLocationClient;

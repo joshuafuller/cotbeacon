@@ -1,5 +1,6 @@
 package com.jon.cotbeacon.ui;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -7,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,6 +22,8 @@ import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
 
+import com.jon.cotbeacon.BuildConfig;
+import com.jon.cotbeacon.CotApplication;
 import com.jon.cotbeacon.R;
 import com.jon.cotbeacon.service.CotService;
 import com.jon.cotbeacon.service.GpsService;
@@ -28,6 +32,8 @@ import com.jon.cotbeacon.utils.Key;
 import com.jon.cotbeacon.utils.Notify;
 import com.jon.cotbeacon.utils.PrefUtils;
 import com.leinardi.android.speeddial.SpeedDialView;
+
+import pub.devrel.easypermissions.EasyPermissions;
 
 public class CotActivity extends AppCompatActivity {
 
@@ -122,6 +128,14 @@ public class CotActivity extends AppCompatActivity {
         Intent gpsIntent = new Intent(this, GpsService.class);
         switch (item.getItemId()) {
             case R.id.start:
+                if (!EasyPermissions.hasPermissions(this, GpsService.GPS_PERMISSION)) {
+                    Notify.red(getRootView(), getString(R.string.permissionBegging),
+                            view -> startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                    Uri.parse("package:" + BuildConfig.APPLICATION_ID))),
+                            "OPEN"
+                    );
+                    return true;
+                }
                 if (presetIsSelected()) {
                     serviceIsRunning = true;
                     cotIntent.setAction(CotService.START_SERVICE);
@@ -131,7 +145,7 @@ public class CotActivity extends AppCompatActivity {
                     invalidateOptionsMenu();
                     toggleSpeedDialVisibility();
                 } else {
-                    Notify.red(findViewById(android.R.id.content), "Select an output destination first!");
+                    Notify.red(getRootView(), "Select an output destination first!");
                 }
                 return true;
             case R.id.stop:
@@ -159,5 +173,9 @@ public class CotActivity extends AppCompatActivity {
     private boolean presetIsSelected() {
         return PrefUtils.getString(prefs, Key.DEST_ADDRESS).length() > 0
                 && PrefUtils.getString(prefs, Key.DEST_PORT).length() > 0;
+    }
+
+    private View getRootView() {
+        return findViewById(android.R.id.content);
     }
 }

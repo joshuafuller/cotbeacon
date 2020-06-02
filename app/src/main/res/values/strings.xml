@@ -1,6 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="ButtonCase">
     <string name="app_name">CoT Beacon</string>
 
+    <string name="permissionRationale">GPS access is required for this app. If you don\'t accept, it won\'t work!</string>
+    <string name="permissionBegging">GPS permission has been denied! You\'ll have to manually change this in the Android settings.</string>
+
     <string name="stop">Stop</string>
     <string name="start">Start</string>
     <string name="about">About</string>

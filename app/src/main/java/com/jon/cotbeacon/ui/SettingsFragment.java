@@ -1,13 +1,10 @@
 package com.jon.cotbeacon.ui;
 
-import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.view.View;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -22,6 +19,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.jon.cotbeacon.BuildConfig;
 import com.jon.cotbeacon.R;
 import com.jon.cotbeacon.enums.Protocol;
+import com.jon.cotbeacon.service.GpsService;
 import com.jon.cotbeacon.utils.GenerateInt;
 import com.jon.cotbeacon.utils.Key;
 import com.jon.cotbeacon.utils.Notify;
@@ -45,7 +43,6 @@ public class SettingsFragment extends PreferenceFragmentCompat
     private SharedPreferences prefs;
     private PresetSqlHelper sqlHelper;
 
-    private static final String[] GPS_PERMISSION = new String[]{Manifest.permission.ACCESS_FINE_LOCATION};
     private static final int GPS_PERMISSION_CODE = GenerateInt.next();
 
     static SettingsFragment newInstance() {
@@ -139,9 +136,8 @@ public class SettingsFragment extends PreferenceFragmentCompat
     }
 
     private void requestGpsPermission() {
-        if (!EasyPermissions.hasPermissions(requireContext(), GPS_PERMISSION)) {
-            String rationale = "The GPS permission is required to access the device's location.";
-            EasyPermissions.requestPermissions(this, rationale, GPS_PERMISSION_CODE, GPS_PERMISSION);
+        if (!EasyPermissions.hasPermissions(requireContext(), GpsService.GPS_PERMISSION)) {
+            EasyPermissions.requestPermissions(this, getString(R.string.permissionRationale), GPS_PERMISSION_CODE, GpsService.GPS_PERMISSION);
         }
     }
 
@@ -160,17 +156,14 @@ public class SettingsFragment extends PreferenceFragmentCompat
     @Override
     public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
         if (requestCode == GPS_PERMISSION_CODE) {
-            if (!ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), GPS_PERMISSION[0])) {
-                /* Permission has been permanently denied */
-                View.OnClickListener action = view -> {
-                    Uri uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
-                    startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, uri));
-                };
-                String msg = "GPS permission denied! Open the Android Settings to adjust permissions manually.";
-                Notify.red(requireView(), msg, action, "OPEN");
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), GpsService.GPS_PERMISSION[0])) {
+                /* Permission has been permanently denied, so show a toast and open Android settings */
+                Notify.toast(requireContext(), getString(R.string.permissionBegging));
+                Uri uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
+                startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, uri));
             } else {
                 /* Permission has been temporarily denied, so we can re-ask within the app */
-                Notify.orange(requireView(), "GPS Permission is required for this setting. Re-select it to try again!");
+                Notify.orange(requireView(), getString(R.string.permissionRationale));
             }
         }
     }
