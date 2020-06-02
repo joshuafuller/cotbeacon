@@ -21,6 +21,7 @@ import com.jon.cotbeacon.BuildConfig;
 import com.jon.cotbeacon.R;
 import com.jon.cotbeacon.ui.CotActivity;
 import com.jon.cotbeacon.utils.GenerateInt;
+import com.jon.cotbeacon.utils.PrefUtils;
 
 public class CotService extends Service {
     private static final String TAG = CotService.class.getSimpleName();
@@ -35,6 +36,7 @@ public class CotService extends Service {
     public static final String CANCEL_EMERGENCY = BASE_INTENT_ID + "CANCEL_EMERGENCY";
 
     private CotManager cotManager;
+    private SharedPreferences prefs;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -45,7 +47,7 @@ public class CotService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
         cotManager = new CotManager(prefs);
     }
 
@@ -91,10 +93,12 @@ public class CotService extends Service {
             Log.e(TAG, "NotificationManager == null");
             return;
         }
+
         NotificationCompat.Builder notification = new NotificationCompat.Builder(this, BuildConfig.APPLICATION_ID)
                 .setOngoing(true)
                 .setSmallIcon(R.drawable.target)
                 .setContentTitle(getString(R.string.app_name))
+                .setContentText(PrefUtils.getPresetInfoString(prefs))
                 .setContentIntent(launchPendingIntent)
                 .addAction(R.drawable.stop, getString(R.string.stop), stopPendingIntent);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
