@@ -5,7 +5,7 @@
     <string name="defaultStaleTimer">5</string>
     <integer name="defaultTeamColour">0xFF00FFFF</integer>
     <string name="defaultTransmissionProtocol">@string/transmissionProtocolTcp</string>
-    <string name="defaultTransmissionPeriod">5</string>
+    <string name="defaultTransmissionPeriod">3</string>
     <string name="defaultTcpPreset">@string/tcpTakserver</string>
     <string name="defaultTcpIp">@string/takserverIp</string>
     <string name="defaultTcpPort">@string/takserverPort</string>
