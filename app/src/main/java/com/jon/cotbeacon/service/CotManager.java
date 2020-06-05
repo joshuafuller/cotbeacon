@@ -2,9 +2,6 @@ package com.jon.cotbeacon.service;
 
 import android.content.SharedPreferences;
 
-import com.jon.cotbeacon.cot.EmergencyCancelCursorOnTarget;
-import com.jon.cotbeacon.cot.EmergencyCursorOnTarget;
-
 class CotManager implements SharedPreferences.OnSharedPreferenceChangeListener {
     private final SharedPreferences prefs;
     private CotThread thread;

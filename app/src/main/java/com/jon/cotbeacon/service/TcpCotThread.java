@@ -35,7 +35,6 @@ class TcpCotThread extends CotThread {
             } catch (IOException e) {
                 e.printStackTrace();
                 Timber.e(e);
-                /* do nothing */
             }
             outputStream = null;
             socket = null;

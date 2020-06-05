@@ -121,15 +121,7 @@ public class CotActivity
             start.setVisible(true);
             stop.setVisible(false);
         }
-        tintMenuIcon(start, android.R.color.holo_green_light);
-        tintMenuIcon(stop, android.R.color.holo_red_light);
         return true;
-    }
-
-    private void tintMenuIcon(MenuItem item, @ColorRes int color) {
-        Drawable wrapDrawable = DrawableCompat.wrap(item.getIcon());
-        DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(this, color));
-        item.setIcon(wrapDrawable);
     }
 
     @Override
