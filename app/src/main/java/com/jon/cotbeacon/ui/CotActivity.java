@@ -1,6 +1,5 @@
 package com.jon.cotbeacon.ui;
 
-import android.Manifest;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -23,7 +22,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
 
 import com.jon.cotbeacon.BuildConfig;
-import com.jon.cotbeacon.CotApplication;
 import com.jon.cotbeacon.R;
 import com.jon.cotbeacon.service.CotService;
 import com.jon.cotbeacon.service.GpsService;
@@ -31,7 +29,6 @@ import com.jon.cotbeacon.utils.DeviceUid;
 import com.jon.cotbeacon.utils.Key;
 import com.jon.cotbeacon.utils.Notify;
 import com.jon.cotbeacon.utils.PrefUtils;
-import com.leinardi.android.speeddial.SpeedDialView;
 
 import pub.devrel.easypermissions.EasyPermissions;
 
@@ -39,8 +36,6 @@ public class CotActivity extends AppCompatActivity {
 
     private LocalBroadcastManager broadcastManager;
     private SharedPreferences prefs;
-    private SpeedDialView speedDial;
-    private SpeedDialView speedDialDisabled;
     private boolean serviceIsRunning;
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -74,15 +69,12 @@ public class CotActivity extends AppCompatActivity {
         DeviceUid.generate(this);
 
         serviceIsRunning = isCotServiceRunning(this);
-        speedDial = SpeedDialCreator.getSpeedDial(this);
-        speedDialDisabled = SpeedDialCreator.getDisabledSpeedDial(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        toggleSpeedDialVisibility();
     }
 
     @Override
@@ -144,7 +136,6 @@ public class CotActivity extends AppCompatActivity {
                     gpsIntent.putExtra(GpsService.NEW_UPDATE_RATE_SECONDS, PrefUtils.getInt(prefs, Key.TRANSMISSION_PERIOD));
                     startService(gpsIntent);
                     invalidateOptionsMenu();
-                    toggleSpeedDialVisibility();
                 } else {
                     Notify.red(getRootView(), "Select an output destination first!");
                 }
@@ -156,19 +147,12 @@ public class CotActivity extends AppCompatActivity {
                 gpsIntent.setAction(GpsService.STOP_SERVICE);
                 startService(gpsIntent);
                 invalidateOptionsMenu();
-                toggleSpeedDialVisibility();
                 return true;
             case R.id.about:
                 AboutDialogCreator.show(this);
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void toggleSpeedDialVisibility() {
-        /* Show the active FAB only if the service is running */
-        speedDial.setVisibility(serviceIsRunning ? View.VISIBLE : View.INVISIBLE);
-        speedDialDisabled.setVisibility(serviceIsRunning ? View.INVISIBLE : View.VISIBLE);
     }
 
     private boolean presetIsSelected() {

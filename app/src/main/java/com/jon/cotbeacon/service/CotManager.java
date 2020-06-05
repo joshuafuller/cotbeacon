@@ -39,18 +39,4 @@ class CotManager implements SharedPreferences.OnSharedPreferenceChangeListener {
             start();
         }
     }
-
-    void startEmergency() {
-        EmergencyCotGenerator generator = new EmergencyCotGenerator(prefs);
-        EmergencyCursorOnTarget cot = generator.getEmergency();
-        CotThread emergencyThread = CotThread.getSingleCotThread(prefs, cot);
-        emergencyThread.start();
-    }
-
-    void cancelEmergency() {
-        EmergencyCotGenerator generator = new EmergencyCotGenerator(prefs);
-        EmergencyCancelCursorOnTarget cot = generator.getEmergencyCancel();
-        CotThread cancellingThread = CotThread.getSingleCotThread(prefs, cot);
-        cancellingThread.start();
-    }
 }

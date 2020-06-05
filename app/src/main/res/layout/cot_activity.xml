@@ -1,5 +1,4 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -10,37 +9,5 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".CotActivity" />
-
-    <com.leinardi.android.speeddial.SpeedDialView
-        android:id="@+id/speedDial"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/padding"
-        android:tooltipText="@string/fabEmergency"
-        app:layout_behavior="@string/speeddial_snackbar_behavior"
-        app:sdExpansionMode="top"
-        app:sdMainFabAnimationRotateAngle="90"
-        app:sdMainFabClosedBackgroundColor="@color/colorAccentDark"
-        app:sdMainFabClosedIconColor="@color/white"
-        app:sdMainFabClosedSrc="@android:drawable/stat_sys_warning"
-        app:sdMainFabOpenedBackgroundColor="@color/colorAccentDark"
-        app:sdMainFabOpenedIconColor="@color/white"
-        app:sdMainFabOpenedSrc="@drawable/cross" />
-
-    <com.leinardi.android.speeddial.SpeedDialView
-        android:id="@+id/speedDialDisabled"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/padding"
-        android:tooltipText="@string/fabEmergency"
-        app:layout_behavior="@string/speeddial_snackbar_behavior"
-        app:sdExpansionMode="top"
-        app:sdMainFabAnimationRotateAngle="90"
-        app:sdMainFabClosedBackgroundColor="@color/disabled"
-        app:sdMainFabClosedIconColor="@color/grey"
-        app:sdMainFabClosedSrc="@android:drawable/stat_sys_warning"
-        tools:visibility="invisible" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

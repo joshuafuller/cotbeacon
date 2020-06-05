@@ -35,10 +35,6 @@
     <string name="defaultSaIp">239.2.3.1</string>
     <string name="defaultSaPort">6969</string>
 
-    <string name="fabEmergency">EMERGENCY</string>
-    <string name="startEmergency">SEND EMERGENCY</string>
-    <string name="cancelEmergency">CANCEL EMERGENCY</string>
-
     <string name="addNewPreset">Add New Preset…</string>
     <string name="deletePresets">Delete Presets…</string>
 </resources>
