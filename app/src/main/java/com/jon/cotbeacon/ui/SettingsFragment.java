@@ -23,6 +23,7 @@ import com.jon.cotbeacon.utils.GenerateInt;
 import com.jon.cotbeacon.utils.Key;
 import com.jon.cotbeacon.utils.Notify;
 import com.jon.cotbeacon.utils.OutputPreset;
+import com.jon.cotbeacon.utils.PrefUtils;
 import com.jon.cotbeacon.utils.PresetSqlHelper;
 
 import org.apache.commons.collections4.ListUtils;
@@ -113,6 +114,12 @@ public class SettingsFragment extends PreferenceFragmentCompat
             case Key.NEW_PRESET_ADDED:
                 updatePresetEntries(Protocol.UDP, Key.UDP_PRESETS);
                 updatePresetEntries(Protocol.TCP, Key.TCP_PRESETS);
+                break;
+            case Key.TRANSMISSION_PERIOD:
+                Intent intent  = new Intent(requireContext(), GpsService.class);
+                intent.setAction(GpsService.CHANGE_UPDATE_RATE);
+                intent.putExtra(GpsService.NEW_UPDATE_RATE_SECONDS, PrefUtils.getInt(prefs, key));
+                requireActivity().startService(intent);
                 break;
         }
     }

@@ -20,8 +20,8 @@ public class GpsService extends Service {
     private static final String BASE_INTENT_ID = BuildConfig.APPLICATION_ID + ".GpsService.";
     public static final String START_SERVICE = BASE_INTENT_ID + "START";
     public static final String STOP_SERVICE = BASE_INTENT_ID + "STOP";
-    private static final String CHANGE_UPDATE_RATE = BASE_INTENT_ID + "CHANGE_UPDATE_RATE";
-    private static final String NEW_UPDATE_RATE_SECONDS = BASE_INTENT_ID + "NEW_UPDATE_RATE_SECONDS";
+    public static final String CHANGE_UPDATE_RATE = BASE_INTENT_ID + "CHANGE_UPDATE_RATE";
+    public static final String NEW_UPDATE_RATE_SECONDS = BASE_INTENT_ID + "NEW_UPDATE_RATE_SECONDS";
 
     public static final String[] GPS_PERMISSION = new String[]{Manifest.permission.ACCESS_FINE_LOCATION};
 
@@ -63,9 +63,10 @@ public class GpsService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null && intent.getAction() != null) {
+            int defaultPeriod = Integer.parseInt(getString(R.string.defaultTransmissionPeriod));
             switch (intent.getAction()) {
                 case START_SERVICE:
-                    updateRateSeconds = Integer.parseInt(getString(R.string.defaultGpsUpdateRate));
+                    updateRateSeconds = intent.getIntExtra(NEW_UPDATE_RATE_SECONDS, defaultPeriod);
                     registerGpsUpdates();
                     break;
                 case STOP_SERVICE:
@@ -74,7 +75,7 @@ public class GpsService extends Service {
                     stopSelf();
                     break;
                 case CHANGE_UPDATE_RATE:
-                    updateRateSeconds = intent.getIntExtra(NEW_UPDATE_RATE_SECONDS, Integer.parseInt(getString(R.string.defaultGpsUpdateRate)));
+                    updateRateSeconds = intent.getIntExtra(NEW_UPDATE_RATE_SECONDS, defaultPeriod);
                     initialiseLocationRequest();
                     break;
             }

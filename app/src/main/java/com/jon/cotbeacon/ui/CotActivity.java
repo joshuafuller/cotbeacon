@@ -141,6 +141,7 @@ public class CotActivity extends AppCompatActivity {
                     cotIntent.setAction(CotService.START_SERVICE);
                     startService(cotIntent);
                     gpsIntent.setAction(GpsService.START_SERVICE);
+                    gpsIntent.putExtra(GpsService.NEW_UPDATE_RATE_SECONDS, PrefUtils.getInt(prefs, Key.TRANSMISSION_PERIOD));
                     startService(gpsIntent);
                     invalidateOptionsMenu();
                     toggleSpeedDialVisibility();

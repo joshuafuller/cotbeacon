@@ -1,7 +1,4 @@
 <resources>
-    <!-- GpsService -->
-    <string name="defaultGpsUpdateRate">5</string>
-
     <!-- Settings -->
     <string name="defaultCallsign">BEACON</string>
     <string name="defaultIconRole">@string/roleTeamMember</string>
