@@ -17,7 +17,7 @@ public class NetworkHelper {
     public static List<NetworkInterface> getValidInterfaces() throws SocketException {
         List<NetworkInterface> interfaces = new ArrayList<>();
         for (NetworkInterface ni : Collections.list(NetworkInterface.getNetworkInterfaces())) {
-            if (ni.isUp() || interfaceHasIpv4Address(ni)) {
+            if (ni.isUp() && interfaceHasIpv4Address(ni)) {
                 interfaces.add(ni);
                 Timber.d("%s is up", ni.getName());
             }
