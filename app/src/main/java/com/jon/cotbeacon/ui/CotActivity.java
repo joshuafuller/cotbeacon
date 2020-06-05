@@ -17,7 +17,6 @@ import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
@@ -54,7 +53,6 @@ public class CotActivity
             service = ((CotService.ServiceBinder) binder).getService();
             service.registerStateListener(CotActivity.this);
             onStateChanged(service.getState(), null);
-
         }
         @Override public void onServiceDisconnected(ComponentName name) {
             Timber.i("onServiceDisconnected");
@@ -68,7 +66,6 @@ public class CotActivity
         /* Regular setup */
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cot_activity);
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.container, SettingsFragment.newInstance())
@@ -88,6 +85,7 @@ public class CotActivity
     protected void onResume() {
         super.onResume();
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs.registerOnSharedPreferenceChangeListener(this);
         requestGpsPermission();
 
         if (service != null) {
@@ -106,6 +104,7 @@ public class CotActivity
                 serviceConnection = null;
             }
         }
+        prefs.unregisterOnSharedPreferenceChangeListener(this);
         super.onDestroy();
     }
 
@@ -201,6 +200,9 @@ public class CotActivity
     @Override
     public void onStateChanged(CotService.State state, @Nullable Throwable throwable) {
         invalidateOptionsMenu();
+        if (state == CotService.State.ERROR && throwable != null) {
+            Notify.red(getRootView(), "Error: " + throwable.getMessage());
+        }
     }
 
     @Override

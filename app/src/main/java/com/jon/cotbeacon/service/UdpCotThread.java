@@ -33,12 +33,11 @@ class UdpCotThread extends CotThread {
     @Override
     void shutdown() {
         super.shutdown();
-        if (sockets != null) {
-            for (DatagramSocket socket : sockets) {
-                socket.close();
-            }
-            sockets.clear();
+        for (DatagramSocket socket : sockets) {
+            socket.close();
         }
+        sockets.clear();
+        interfaceNames.clear();
     }
 
     @Override
