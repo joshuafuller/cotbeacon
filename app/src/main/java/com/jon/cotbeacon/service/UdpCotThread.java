@@ -21,6 +21,7 @@ import timber.log.Timber;
 
 class UdpCotThread extends CotThread {
     private List<DatagramSocket> sockets = new ArrayList<>();
+    private List<String> interfaceNames = new ArrayList<>();
 
     UdpCotThread(SharedPreferences sharedPreferences) {
         super(sharedPreferences);
@@ -72,13 +73,19 @@ class UdpCotThread extends CotThread {
             if (destIp.isMulticastAddress()) {
                 final List<NetworkInterface> interfaces = NetworkHelper.getValidInterfaces();
                 for (NetworkInterface ni : interfaces) {
-                    MulticastSocket socket = new MulticastSocket();
-                    socket.setNetworkInterface(ni);
-                    socket.setLoopbackMode(false);
-                    sockets.add(socket);
+                    InetAddress address = NetworkHelper.getAddressFromInterface(ni);
+                    if (address != null) {
+                        Timber.i("Interface %s is valid with address %s", ni.getName(), address.getHostAddress());
+                        MulticastSocket socket = new MulticastSocket();
+                        socket.setNetworkInterface(ni);
+                        socket.setLoopbackMode(false);
+                        sockets.add(socket);
+                        interfaceNames.add(ni.getName());
+                    }
                 }
             } else {
                 sockets.add(new DatagramSocket());
+                interfaceNames.add("all interfaces");
             }
         } catch (IOException e) {
             Timber.e("Error when building transmit UDP socket");
@@ -90,9 +97,9 @@ class UdpCotThread extends CotThread {
     protected void sendToDestination(CursorOnTarget cot) {
         try {
             final byte[] buf = cot.toBytes();
-            for (DatagramSocket socket : sockets) {
-                socket.send(new DatagramPacket(buf, buf.length, destIp, destPort));
-                Timber.i("Sent cot: %s", cot.toString());
+            for (int i = 0; i < sockets.size(); i++) {
+                sockets.get(i).send(new DatagramPacket(buf, buf.length, destIp, destPort));
+                Timber.i("Sent cot over %s: %s", interfaceNames.get(i), cot.toString());
             }
         } catch (IOException e) {
             e.printStackTrace();
