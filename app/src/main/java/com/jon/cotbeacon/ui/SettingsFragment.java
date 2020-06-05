@@ -1,12 +1,8 @@
 package com.jon.cotbeacon.ui;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
@@ -15,15 +11,11 @@ import androidx.preference.PreferenceManager;
 import androidx.preference.SeekBarPreference;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.jon.cotbeacon.BuildConfig;
 import com.jon.cotbeacon.R;
 import com.jon.cotbeacon.enums.Protocol;
-import com.jon.cotbeacon.service.GpsService;
-import com.jon.cotbeacon.utils.GenerateInt;
 import com.jon.cotbeacon.utils.Key;
 import com.jon.cotbeacon.utils.Notify;
 import com.jon.cotbeacon.utils.OutputPreset;
-import com.jon.cotbeacon.utils.PrefUtils;
 import com.jon.cotbeacon.utils.PresetSqlHelper;
 
 import org.apache.commons.collections4.ListUtils;
@@ -34,16 +26,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import pub.devrel.easypermissions.EasyPermissions;
-
-public class SettingsFragment extends PreferenceFragmentCompat
+public class SettingsFragment
+        extends PreferenceFragmentCompat
         implements SharedPreferences.OnSharedPreferenceChangeListener,
-        Preference.OnPreferenceChangeListener,
-        EasyPermissions.PermissionCallbacks {
+        Preference.OnPreferenceChangeListener {
     private SharedPreferences prefs;
     private PresetSqlHelper sqlHelper;
 
-    private static final int GPS_PERMISSION_CODE = GenerateInt.next();
+    /* There will probably be more, but these are all I've found to not work */
     private static final char[] INVALID_CALLSIGN_CHARACTERS = new char[] { '&', '\"', '<' };
 
     static SettingsFragment newInstance() {
@@ -51,7 +41,7 @@ public class SettingsFragment extends PreferenceFragmentCompat
     }
 
     private static final Map<String, String> PREFS_REQUIRING_VALIDATION = new HashMap<String, String>() {{
-        put(Key.CALLSIGN, "Callsign can't any of the following characters: &\"<");
+        put(Key.CALLSIGN, "Callsign can't any of the following characters: " + new String(INVALID_CALLSIGN_CHARACTERS));
     }};
 
     private static final String[] SEEKBARS = new String[]{
@@ -83,10 +73,19 @@ public class SettingsFragment extends PreferenceFragmentCompat
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        updatePreferences();
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
+        updatePreferences();
+    }
+
+    private void updatePreferences() {
         toggleProtocolSettingVisibility();
-        requestGpsPermission();
         updatePresetEntries(Protocol.UDP, Key.UDP_PRESETS);
         updatePresetEntries(Protocol.TCP, Key.TCP_PRESETS);
         Protocol newProtocol = Protocol.fromPrefs(prefs);
@@ -116,12 +115,6 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 updatePresetEntries(Protocol.UDP, Key.UDP_PRESETS);
                 updatePresetEntries(Protocol.TCP, Key.TCP_PRESETS);
                 break;
-            case Key.TRANSMISSION_PERIOD:
-                Intent intent  = new Intent(requireContext(), GpsService.class);
-                intent.setAction(GpsService.CHANGE_UPDATE_RATE);
-                intent.putExtra(GpsService.NEW_UPDATE_RATE_SECONDS, PrefUtils.getInt(prefs, key));
-                requireActivity().startService(intent);
-                break;
         }
     }
 
@@ -138,39 +131,6 @@ public class SettingsFragment extends PreferenceFragmentCompat
                 presetPref.setValue(null);
                 addressPref.setText(null);
                 portPref.setText(null);
-            }
-        }
-    }
-
-    private void requestGpsPermission() {
-        if (!EasyPermissions.hasPermissions(requireContext(), GpsService.GPS_PERMISSION)) {
-            EasyPermissions.requestPermissions(this, getString(R.string.permissionRationale), GPS_PERMISSION_CODE, GpsService.GPS_PERMISSION);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
-    }
-
-    @Override
-    public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
-        if (requestCode == GPS_PERMISSION_CODE) {
-            Notify.green(requireView(), "GPS Permission successfully granted");
-        }
-    }
-
-    @Override
-    public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
-        if (requestCode == GPS_PERMISSION_CODE) {
-            if (!ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), GpsService.GPS_PERMISSION[0])) {
-                /* Permission has been permanently denied, so show a toast and open Android settings */
-                Notify.toast(requireContext(), getString(R.string.permissionBegging));
-                Uri uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
-                startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, uri));
-            } else {
-                /* Permission has been temporarily denied, so we can re-ask within the app */
-                Notify.orange(requireView(), getString(R.string.permissionRationale));
             }
         }
     }
@@ -194,10 +154,8 @@ public class SettingsFragment extends PreferenceFragmentCompat
 
     private boolean callsignContainsInvalidCharacters(String callsign) {
         for (char invalidCharacter : INVALID_CALLSIGN_CHARACTERS) {
-            if (callsign.indexOf(invalidCharacter) != -1) {
-                /* The character is in the string */
-                return true;
-            }
+            /* If the character is in the callsign string */
+            if (callsign.indexOf(invalidCharacter) != -1) return true;
         }
         return false;
     }

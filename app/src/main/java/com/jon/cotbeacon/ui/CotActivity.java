@@ -1,49 +1,65 @@
 package com.jon.cotbeacon.ui;
 
-import android.app.ActivityManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
+import android.Manifest;
+import android.content.ComponentName;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 import androidx.annotation.ColorRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
 
 import com.jon.cotbeacon.BuildConfig;
 import com.jon.cotbeacon.R;
 import com.jon.cotbeacon.service.CotService;
-import com.jon.cotbeacon.service.GpsService;
 import com.jon.cotbeacon.utils.DeviceUid;
+import com.jon.cotbeacon.utils.GenerateInt;
 import com.jon.cotbeacon.utils.Key;
 import com.jon.cotbeacon.utils.Notify;
 import com.jon.cotbeacon.utils.PrefUtils;
 
+import java.util.List;
+
 import pub.devrel.easypermissions.EasyPermissions;
+import timber.log.Timber;
 
-public class CotActivity extends AppCompatActivity {
+public class CotActivity
+        extends AppCompatActivity
+        implements CotService.StateListener,
+                   EasyPermissions.PermissionCallbacks,
+                   SharedPreferences.OnSharedPreferenceChangeListener {
+    private static final int PERMISSIONS_CODE = GenerateInt.next();
+    public static final String[] PERMISSIONS = new String[]{ Manifest.permission.ACCESS_FINE_LOCATION };
 
-    private LocalBroadcastManager broadcastManager;
     private SharedPreferences prefs;
-    private boolean serviceIsRunning;
-    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent != null && intent.getAction() != null && intent.getAction().equals(CotService.CLOSE_SERVICE_INTERNAL)) {
-                serviceIsRunning = false;
-                invalidateOptionsMenu();
-            }
+
+    private CotService service;
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override public void onServiceConnected(ComponentName name, IBinder binder) {
+            Timber.i("onServiceConnected");
+            service = ((CotService.ServiceBinder) binder).getService();
+            service.registerStateListener(CotActivity.this);
+            onStateChanged(service.getState(), null);
+
+        }
+        @Override public void onServiceDisconnected(ComponentName name) {
+            Timber.i("onServiceDisconnected");
+            service.unregisterStateListener();
+            service = null;
         }
     };
 
@@ -59,41 +75,38 @@ public class CotActivity extends AppCompatActivity {
                     .commitNow();
         }
 
-        /* Receiving intents from services */
-        broadcastManager = LocalBroadcastManager.getInstance(this);
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(CotService.CLOSE_SERVICE_INTERNAL);
-        broadcastManager.registerReceiver(broadcastReceiver, intentFilter);
-
         /* Generate a device-specific UUID and save to file, if it doesn't already exist */
         DeviceUid.generate(this);
 
-        serviceIsRunning = isCotServiceRunning(this);
+        /* Start the service and bind to it */
+        Intent intent = new Intent(this, CotService.class);
+        startService(intent);
+        bindService(intent, serviceConnection, BIND_AUTO_CREATE);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        requestGpsPermission();
+
+        if (service != null) {
+            /* Refresh our state on resuming */
+            onStateChanged(service.getState(), null);
+        }
     }
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
-        broadcastManager.unregisterReceiver(broadcastReceiver);
-    }
-
-    private boolean isCotServiceRunning(Context context) {
-        final String cotService = CotService.class.getName();
-        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        /* Note that getRunningServices() is deprecated and currently only returns the services associated
-         * with the current application. But that's all we need anyway, so whatever */
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (cotService.equals(service.service.getClassName())) {
-                return true;
+        if (service != null) {
+            service.unregisterStateListener();
+            service = null;
+            if (serviceConnection != null) {
+                unbindService(serviceConnection);
+                serviceConnection = null;
             }
         }
-        return false;
+        super.onDestroy();
     }
 
     @Override
@@ -101,8 +114,13 @@ public class CotActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu, menu);
         MenuItem start = menu.findItem(R.id.start);
         MenuItem stop = menu.findItem(R.id.stop);
-        start.setVisible(!serviceIsRunning);
-        stop.setVisible(serviceIsRunning);
+        if (service != null) {
+            start.setVisible(service.getState() == CotService.State.STOPPED);
+            stop.setVisible(service.getState() == CotService.State.RUNNING);
+        } else {
+            start.setVisible(true);
+            stop.setVisible(false);
+        }
         tintMenuIcon(start, android.R.color.holo_green_light);
         tintMenuIcon(stop, android.R.color.holo_red_light);
         return true;
@@ -116,37 +134,28 @@ public class CotActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Intent cotIntent = new Intent(this, CotService.class);
-        Intent gpsIntent = new Intent(this, GpsService.class);
         switch (item.getItemId()) {
             case R.id.start:
-                if (!EasyPermissions.hasPermissions(this, GpsService.GPS_PERMISSION)) {
-                    Notify.red(getRootView(), getString(R.string.permissionBegging),
-                            view -> startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                                    Uri.parse("package:" + BuildConfig.APPLICATION_ID))),
-                            "OPEN"
-                    );
+                if (!EasyPermissions.hasPermissions(this, PERMISSIONS)) {
+                    View.OnClickListener listener = view -> {
+                        Uri uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
+                        startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, uri));
+                    };
+                    Notify.red(getRootView(), getString(R.string.permissionBegging), listener, "OPEN");
                     return true;
                 }
                 if (presetIsSelected()) {
-                    serviceIsRunning = true;
-                    cotIntent.setAction(CotService.START_SERVICE);
-                    startService(cotIntent);
-                    gpsIntent.setAction(GpsService.START_SERVICE);
-                    gpsIntent.putExtra(GpsService.NEW_UPDATE_RATE_SECONDS, PrefUtils.getInt(prefs, Key.TRANSMISSION_PERIOD));
-                    startService(gpsIntent);
+                    service.start();
                     invalidateOptionsMenu();
+                    Notify.green(getRootView(), "Service started");
                 } else {
                     Notify.red(getRootView(), "Select an output destination first!");
                 }
                 return true;
             case R.id.stop:
-                serviceIsRunning = false;
-                cotIntent.setAction(CotService.STOP_SERVICE);
-                startService(cotIntent);
-                gpsIntent.setAction(GpsService.STOP_SERVICE);
-                startService(gpsIntent);
+                service.stop();
                 invalidateOptionsMenu();
+                Notify.blue(getRootView(), "Service stopped");
                 return true;
             case R.id.about:
                 AboutDialogCreator.show(this);
@@ -162,5 +171,50 @@ public class CotActivity extends AppCompatActivity {
 
     private View getRootView() {
         return findViewById(android.R.id.content);
+    }
+
+    private void requestGpsPermission() {
+        if (!EasyPermissions.hasPermissions(this, PERMISSIONS)) {
+            EasyPermissions.requestPermissions(this, getString(R.string.permissionRationale), PERMISSIONS_CODE, PERMISSIONS);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    }
+
+    @Override
+    public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
+        if (requestCode == PERMISSIONS_CODE) {
+            Notify.green(getRootView(), "GPS Permission successfully granted");
+        }
+    }
+
+    @Override
+    public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
+        if (requestCode == PERMISSIONS_CODE) {
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(this, PERMISSIONS[0])) {
+                /* Permission has been permanently denied, so show a toast and open Android settings */
+                Notify.toast(this, getString(R.string.permissionBegging));
+                Uri uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID);
+                startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, uri));
+            } else {
+                /* Permission has been temporarily denied, so we can re-ask within the app */
+                Notify.orange(getRootView(), getString(R.string.permissionRationale));
+            }
+        }
+    }
+
+    @Override
+    public void onStateChanged(CotService.State state, @Nullable Throwable throwable) {
+        invalidateOptionsMenu();
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+        if (Key.TRANSMISSION_PERIOD.equals(key)) {
+            service.updateGpsPeriod(PrefUtils.getInt(prefs, key));
+        }
     }
 }
