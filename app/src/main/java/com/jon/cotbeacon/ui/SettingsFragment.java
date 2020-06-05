@@ -44,13 +44,14 @@ public class SettingsFragment extends PreferenceFragmentCompat
     private PresetSqlHelper sqlHelper;
 
     private static final int GPS_PERMISSION_CODE = GenerateInt.next();
+    private static final char[] INVALID_CALLSIGN_CHARACTERS = new char[] { '&', '\"', '<' };
 
     static SettingsFragment newInstance() {
         return new SettingsFragment();
     }
 
     private static final Map<String, String> PREFS_REQUIRING_VALIDATION = new HashMap<String, String>() {{
-        put(Key.CALLSIGN, "Should only contain alphanumeric characters");
+        put(Key.CALLSIGN, "Callsign can't any of the following characters: &\"<");
     }};
 
     private static final String[] SEEKBARS = new String[]{
@@ -183,13 +184,22 @@ public class SettingsFragment extends PreferenceFragmentCompat
     @Override
     public boolean onPreferenceChange(Preference pref, Object newValue) {
         final String str = (String) newValue;
-        boolean result = true;
-        if (Key.CALLSIGN.equals(pref.getKey()) && !str.matches("\\w*?")) {
+        if (Key.CALLSIGN.equals(pref.getKey()) && callsignContainsInvalidCharacters(str)) {
             /* alphanumeric characters only */
-            Notify.red(requireView(), "Invalid input: " + str + ". " + PREFS_REQUIRING_VALIDATION.get(pref.getKey()));
+            Notify.red(requireView(), "Invalid input: '" + str + "'. " + PREFS_REQUIRING_VALIDATION.get(pref.getKey()));
             return false;
         }
         return true;
+    }
+
+    private boolean callsignContainsInvalidCharacters(String callsign) {
+        for (char invalidCharacter : INVALID_CALLSIGN_CHARACTERS) {
+            if (callsign.indexOf(invalidCharacter) != -1) {
+                /* The character is in the string */
+                return true;
+            }
+        }
+        return false;
     }
 
     private void setPresetPreferenceListeners() {
