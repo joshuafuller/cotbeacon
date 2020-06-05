@@ -31,7 +31,7 @@ abstract class CotThread extends Thread {
 
     protected CotThread(SharedPreferences prefs) {
         this.prefs = prefs;
-        cotGenerator = cotGenerator.getFromPrefs(prefs);
+        cotGenerator = CotGenerator.getFromPrefs(prefs);
         cotIcons = cotGenerator.generate();
     }
 
