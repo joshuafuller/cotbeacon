@@ -1,5 +1,8 @@
 # Cursor On Target Beacon
 
+## ARCHIVE 
+***This repository is now archived as of 16th July 2020***. Since it shared so much code anyway, I've merged it back in with [CoT Generator](https://github.com/jonapoul/cotgenerator). They are still two separate apps, but they are in the same code repository.
+
 ## Preface
 This is the sister app of [CoT Generator](https://github.com/jonapoul/cotgenerator). CoT Generator generates fake data, CoT Beacon generates a single self icon only.
 
